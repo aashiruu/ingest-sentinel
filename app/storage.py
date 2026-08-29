@@ -14,6 +14,7 @@ class DeviceAggregate(BaseModel):
     latest_reading: Optional[float] = None
     latest_timestamp: Optional[datetime] = None
     out_of_order_count: int = 0
+    late_rejected_count: int = 0
 
 class StoredEvent(BaseModel):
     event_id: str
@@ -29,18 +30,21 @@ class IngestResult(BaseModel):
     status: str
     is_duplicate: bool
     is_out_of_order: bool
+    is_late_rejected: bool
     device_id: str
     aggregate: DeviceAggregate
 
 class TelemetryStore:
-    def __init__(self, dedupe_ttl_seconds: int = 3600):
+    def __init__(self, dedupe_ttl_seconds: int = 3600, late_window_seconds: int = 300):
         self._lock = asyncio.Lock()
         self._events: Dict[str, List[StoredEvent]] = {}
         self._aggregates: Dict[str, DeviceAggregate] = {}
         self._seen_events: Dict[str, datetime] = {}
         self._dedupe_ttl = timedelta(seconds=dedupe_ttl_seconds)
+        self._late_window = timedelta(seconds=late_window_seconds)
         self.duplicate_count: int = 0
         self.out_of_order_count: int = 0
+        self.late_rejected_count: int = 0
 
     def _purge_expired_dedupe_keys(self, now: datetime):
         cutoff = now - self._dedupe_ttl
@@ -66,6 +70,22 @@ class TelemetryStore:
                     status="duplicate_ignored",
                     is_duplicate=True,
                     is_out_of_order=False,
+                    is_late_rejected=False,
+                    device_id=device_id,
+                    aggregate=agg
+                )
+
+            # 2. Late-Arrival Window Policy Check
+            # Events older than now - late_window are rejected
+            cutoff_time = now - self._late_window
+            if timestamp < cutoff_time:
+                self.late_rejected_count += 1
+                agg.late_rejected_count += 1
+                return IngestResult(
+                    status="late_rejected",
+                    is_duplicate=False,
+                    is_out_of_order=False,
+                    is_late_rejected=True,
                     device_id=device_id,
                     aggregate=agg
                 )
@@ -81,24 +101,24 @@ class TelemetryStore:
                 received_at=now
             )
 
-            # Insert into sorted position in history
+            # Insert into sorted historical journal
             bisect.insort(self._events[device_id], stored)
 
-            # 2. Check for out-of-order arrival
+            # 3. Check for out-of-order arrival
             is_out_of_order = False
             if agg.latest_timestamp is not None and timestamp < agg.latest_timestamp:
                 is_out_of_order = True
                 agg.out_of_order_count += 1
                 self.out_of_order_count += 1
 
-            # 3. Update cumulative statistics
+            # 4. Update cumulative statistics
             agg.count += 1
             agg.sum_readings += reading
             agg.avg_reading = round(agg.sum_readings / agg.count, 2)
             agg.min_reading = reading if agg.min_reading is None else min(agg.min_reading, reading)
             agg.max_reading = reading if agg.max_reading is None else max(agg.max_reading, reading)
 
-            # 4. Only update latest reading if timestamp is newer or equal
+            # 5. Only update latest reading if timestamp is newer or equal
             if not is_out_of_order:
                 agg.latest_timestamp = timestamp
                 agg.latest_reading = reading
@@ -107,6 +127,7 @@ class TelemetryStore:
                 status="accepted",
                 is_duplicate=False,
                 is_out_of_order=is_out_of_order,
+                is_late_rejected=False,
                 device_id=device_id,
                 aggregate=agg
             )
@@ -130,5 +151,6 @@ class TelemetryStore:
             self._seen_events.clear()
             self.duplicate_count = 0
             self.out_of_order_count = 0
+            self.late_rejected_count = 0
 
 store = TelemetryStore()

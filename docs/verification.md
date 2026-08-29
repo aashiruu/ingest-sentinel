@@ -43,3 +43,19 @@ pytest tests/test_out_of_order.py -v
 ```bash
 python simulate_fleet.py --count 5 --mode out-of-order
 ```
+## Stage 4: Late-Arrival Window Policy Verification
+
+### Test Strategy
+1. Send an event with timestamp within the 5-minute sliding window ($T_{\text{now}} - 2\text{m}$). Verify acceptance and aggregate update.
+2. Send an event with timestamp beyond the window ($T_{\text{now}} - 10\text{m}$). Verify rejection (`is_late_rejected: true`), increment of `late_rejected_count`, and isolation from aggregate calculations and event logs.
+
+### Verification Run
+```bash
+pytest tests/test_late_arrival.py -v
+```
+
+### Simulator Verification
+```bash
+python simulate_fleet.py --count 3 --mode delayed
+```
+

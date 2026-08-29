@@ -32,6 +32,7 @@ async def ingest_event(event: TelemetryEvent):
         "status": result.status,
         "is_duplicate": result.is_duplicate,
         "is_out_of_order": result.is_out_of_order,
+        "is_late_rejected": result.is_late_rejected,
         "device_id": result.device_id,
         "current_aggregate": result.aggregate
     }

@@ -52,3 +52,19 @@ Network routing variations and device connection drops mean events regularly arr
 
 ### Decision
 Guards evaluate `event.timestamp >= aggregate.latest_timestamp` before updating the latest device reading. Historical aggregates seamlessly assimilate out-of-order events into the dataset.
+
+## 4. Late-Arrival Window Policy: Watermark & Bounded Lateness
+
+### Context
+Allowing arbitrary retroactive data mutation leads to unbounded memory retention and unstable historical analytics. Stream processing and ingestion architectures require a definitive cut-off window (watermark) after which data is considered finalized.
+
+### Options Considered
+1. **Unbounded Late Acceptance:**
+   - *Pros:* Accommodates offline sensor devices that reconnect after weeks.
+   - *Cons:* Destabilizes materialized reporting; prevents cache eviction and memory compaction.
+2. **Fixed Sliding Lateness Window (Selected):**
+   - *Pros:* Provides deterministic finality for aggregates; bounds deduplication cache lifetimes; explicitly isolates stale data.
+   - *Cons:* Legitimate measurements recorded during extended network blackouts exceeding the window are rejected at the primary tier (would require secondary batch backfilling in production pipelines).
+
+### Decision
+Enforce a configurable 5-minute (300s) late-arrival window evaluated against current ingestion time. Events with timestamps older than 300s are rejected with `late_rejected` status and tracked in dead-letter counters without altering device state.
