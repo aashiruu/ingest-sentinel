@@ -21,16 +21,17 @@ def health_check():
 
 @app.post("/api/v1/events", status_code=status.HTTP_202_ACCEPTED)
 async def ingest_event(event: TelemetryEvent):
-    agg = await store.record_event(
+    result = await store.record_event(
         event_id=event.event_id,
         device_id=event.device_id,
         timestamp=event.timestamp,
         reading=event.reading
     )
     return {
-        "status": "accepted",
-        "device_id": event.device_id,
-        "current_aggregate": agg
+        "status": result.status,
+        "is_duplicate": result.is_duplicate,
+        "device_id": result.device_id,
+        "current_aggregate": result.aggregate
     }
 
 @app.get("/api/v1/devices/{device_id}", response_model=DeviceAggregate)
