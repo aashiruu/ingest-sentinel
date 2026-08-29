@@ -70,5 +70,5 @@ pytest tests/test_observability.py -v
 ```
 ### Manual Verification Command
 ```bash
-curl [http://127.0.0.1:8000/metrics](http://127.0.0.1:8000/metrics) | grep telemetry_
+curl http://127.0.0.1:8000/metrics | grep telemetry_
 ```
