@@ -25,3 +25,21 @@ pytest tests/test_deduplication.py -v
 ```bash
 python simulate_fleet.py --count 3 --mode duplicates
 ```
+## Stage 3: Out-of-Order Event Handling Verification
+
+### Test Strategy
+Send a newer event ($T_2$, value: $100$) followed by an older event ($T_1$, value: $50$, where $T_1 < T_2$). Verify that:
+1. The older event is flagged with `is_out_of_order: true`.
+2. `latest_reading` remains $100$ and does not regress to $50$.
+3. Statistical aggregates (`count`, `sum`, `avg`) correctly incorporate both values.
+4. The device history endpoint returns events sorted chronologically by measurement timestamp.
+
+### Verification Run
+```bash
+pytest tests/test_out_of_order.py -v
+```
+
+### Simulator Verification
+```bash
+python simulate_fleet.py --count 5 --mode out-of-order
+```
