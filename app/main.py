@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Response, status
 from pydantic import BaseModel, Field
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from app.storage import store, DeviceAggregate, StoredEvent
 
@@ -19,6 +20,10 @@ class TelemetryEvent(BaseModel):
 @app.get("/healthz", status_code=status.HTTP_200_OK)
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/metrics")
+def get_metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @app.post("/api/v1/events", status_code=status.HTTP_202_ACCEPTED)
 async def ingest_event(event: TelemetryEvent):

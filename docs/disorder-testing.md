@@ -48,3 +48,19 @@ The ordered historical journal strictly sorted the events as
 ```bash
 pytest tests/test_disorder.py -v.
 ```
+
+## Observability During Disorder Testing
+
+During chaotic ingestion runs, the `/metrics` endpoint exposes runtime counters reflecting network anomalies:
+
+```promql
+# Sample metrics scraped during disorder execution
+telemetry_events_ingested_total{status="accepted"} 3.0
+telemetry_events_ingested_total{status="duplicate_ignored"} 2.0
+telemetry_events_ingested_total{status="late_rejected"} 1.0
+telemetry_events_disorder_total{type="out_of_order"} 2.0
+telemetry_events_disorder_total{type="late_arrival"} 1.0
+telemetry_events_disorder_total{type="duplicate"} 2.0
+telemetry_active_devices_total 1.0
+```
+

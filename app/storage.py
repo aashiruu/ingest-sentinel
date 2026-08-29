@@ -4,6 +4,12 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 from pydantic import BaseModel
 
+from app.metrics import (
+    EVENTS_INGESTED_TOTAL,
+    EVENTS_DISORDER_TOTAL,
+    ACTIVE_DEVICES_GAUGE
+)
+
 class DeviceAggregate(BaseModel):
     device_id: str
     count: int = 0
@@ -57,15 +63,19 @@ class TelemetryStore:
             now = datetime.now(timezone.utc)
             self._purge_expired_dedupe_keys(now)
 
-            if device_id not in self._aggregates:
+            is_new_device = device_id not in self._aggregates
+            if is_new_device:
                 self._aggregates[device_id] = DeviceAggregate(device_id=device_id)
                 self._events[device_id] = []
+                ACTIVE_DEVICES_GAUGE.set(len(self._aggregates))
 
             agg = self._aggregates[device_id]
 
             # 1. Deduplication Check
             if event_id in self._seen_events:
                 self.duplicate_count += 1
+                EVENTS_INGESTED_TOTAL.labels(status="duplicate_ignored").inc()
+                EVENTS_DISORDER_TOTAL.labels(type="duplicate").inc()
                 return IngestResult(
                     status="duplicate_ignored",
                     is_duplicate=True,
@@ -76,11 +86,12 @@ class TelemetryStore:
                 )
 
             # 2. Late-Arrival Window Policy Check
-            # Events older than now - late_window are rejected
             cutoff_time = now - self._late_window
             if timestamp < cutoff_time:
                 self.late_rejected_count += 1
                 agg.late_rejected_count += 1
+                EVENTS_INGESTED_TOTAL.labels(status="late_rejected").inc()
+                EVENTS_DISORDER_TOTAL.labels(type="late_arrival").inc()
                 return IngestResult(
                     status="late_rejected",
                     is_duplicate=False,
@@ -110,6 +121,7 @@ class TelemetryStore:
                 is_out_of_order = True
                 agg.out_of_order_count += 1
                 self.out_of_order_count += 1
+                EVENTS_DISORDER_TOTAL.labels(type="out_of_order").inc()
 
             # 4. Update cumulative statistics
             agg.count += 1
@@ -122,6 +134,8 @@ class TelemetryStore:
             if not is_out_of_order:
                 agg.latest_timestamp = timestamp
                 agg.latest_reading = reading
+
+            EVENTS_INGESTED_TOTAL.labels(status="accepted").inc()
 
             return IngestResult(
                 status="accepted",
@@ -152,5 +166,6 @@ class TelemetryStore:
             self.duplicate_count = 0
             self.out_of_order_count = 0
             self.late_rejected_count = 0
+            ACTIVE_DEVICES_GAUGE.set(0)
 
 store = TelemetryStore()
