@@ -1,8 +1,9 @@
 from datetime import datetime
+from typing import List
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
-from app.storage import store, DeviceAggregate
+from app.storage import store, DeviceAggregate, StoredEvent
 
 app = FastAPI(
     title="ingest-sentinel",
@@ -30,6 +31,7 @@ async def ingest_event(event: TelemetryEvent):
     return {
         "status": result.status,
         "is_duplicate": result.is_duplicate,
+        "is_out_of_order": result.is_out_of_order,
         "device_id": result.device_id,
         "current_aggregate": result.aggregate
     }
@@ -40,6 +42,10 @@ async def get_device(device_id: str):
     if not state:
         raise HTTPException(status_code=404, detail=f"Device {device_id} not found")
     return state
+
+@app.get("/api/v1/devices/{device_id}/events", response_model=List[StoredEvent])
+async def get_device_history(device_id: str):
+    return await store.get_device_events(device_id)
 
 @app.get("/api/v1/devices")
 async def list_devices():
