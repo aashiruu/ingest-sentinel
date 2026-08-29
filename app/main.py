@@ -1,6 +1,8 @@
 from datetime import datetime
-from fastapi import FastAPI, status
+from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
+
+from app.storage import store, DeviceAggregate
 
 app = FastAPI(
     title="ingest-sentinel",
@@ -19,11 +21,25 @@ def health_check():
 
 @app.post("/api/v1/events", status_code=status.HTTP_202_ACCEPTED)
 async def ingest_event(event: TelemetryEvent):
-    # Stage 0 accepts and echoes the payload structure without persistent storage
+    agg = await store.record_event(
+        event_id=event.event_id,
+        device_id=event.device_id,
+        timestamp=event.timestamp,
+        reading=event.reading
+    )
     return {
-        "status": "received",
-        "event_id": event.event_id,
+        "status": "accepted",
         "device_id": event.device_id,
-        "timestamp": event.timestamp.isoformat(),
-        "reading": event.reading
+        "current_aggregate": agg
     }
+
+@app.get("/api/v1/devices/{device_id}", response_model=DeviceAggregate)
+async def get_device(device_id: str):
+    state = await store.get_device_state(device_id)
+    if not state:
+        raise HTTPException(status_code=404, detail=f"Device {device_id} not found")
+    return state
+
+@app.get("/api/v1/devices")
+async def list_devices():
+    return await store.get_all_states()
