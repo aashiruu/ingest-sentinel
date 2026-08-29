@@ -68,3 +68,19 @@ Allowing arbitrary retroactive data mutation leads to unbounded memory retention
 
 ### Decision
 Enforce a configurable 5-minute (300s) late-arrival window evaluated against current ingestion time. Events with timestamps older than 300s are rejected with `late_rejected` status and tracked in dead-letter counters without altering device state.
+
+## 5. Metric Cardinality: Platform Aggregation vs. Per-Device Dimensions
+
+### Context
+Telemetry services process millions of events across large device fleets. Ingested events undergo classification into accepted, duplicate, out-of-order, and late-rejected states.
+
+### Options Considered
+1. **Per-Device Prometheus Labels:**
+   - *Pros:* Allows filtering Prometheus dashboards down to an individual device ID.
+   - *Cons:* Creates an unbounded metric cardinality explosion ($O(N \times \text{metrics})$), degrading Prometheus TSDB performance and driving high memory usage.
+2. **Aggregated Low-Cardinality Metric Counters (Selected):**
+   - *Pros:* Constant metric time-series count ($O(1)$) regardless of fleet size. High throughput and predictable memory footprint.
+   - *Cons:* Individual device debugging relies on query endpoints (`/api/v1/devices/{id}`) rather than global Prometheus metrics.
+
+### Decision
+Export bounded Prometheus counters representing global operational states (`telemetry_events_ingested_total{status}`, `telemetry_events_disorder_total{type}`). Per-device debugging is delegated to endpoint lookups and localized event history logs.
