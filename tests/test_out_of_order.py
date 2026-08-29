@@ -44,7 +44,9 @@ async def test_out_of_order_event_handling():
         state = state_resp.json()
 
         assert state["latest_reading"] == 100.0
-        assert state["latest_timestamp"] == t_newer.isoformat()
+        # Parse returned timestamp to verify temporal equality regardless of 'Z' vs '+00:00'
+        parsed_latest_ts = datetime.fromisoformat(state["latest_timestamp"].replace("Z", "+00:00"))
+        assert parsed_latest_ts == t_newer
         assert state["count"] == 2
         assert state["sum_readings"] == 150.0
         assert state["avg_reading"] == 75.0
