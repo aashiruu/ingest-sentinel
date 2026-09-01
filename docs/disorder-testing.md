@@ -77,18 +77,18 @@ python simulate_fleet.py --count 100 --mode disorder
 During high-volume fleet disorder bursts, the Grafana dashboard visualizes real-time metric categorization and disorder tracking across three specific observation areas:
 
 ### 1. Full Dashboard Overview
-<img width="1006" height="491" alt="Disorder Test Dashboard Overview" src="https://github.com/user-attachments/assets/c86a1abb-d1cf-4cae-8416-de33d0b07239" />
+<img width="959" height="496" alt="disorder test dashboard overview" src="https://github.com/user-attachments/assets/f69874c2-cbc0-46d2-b860-7ef57c16d637" />
 
 ### 2. Ingestion Status Breakdown
 Tracks throughput of accepted events versus discarded duplicates and late-rejected stale payloads.
 
-<img width="511" height="276" alt="Ingested Events by Status" src="https://github.com/user-attachments/assets/f7ce1da4-d7d1-4bd4-98c3-6447bb91b596" />
+<img width="479" height="282" alt="Ingested Events by Status" src="https://github.com/user-attachments/assets/4998fda4-9221-40ce-b8f7-08b11b881ed5" />
 
 
 ### 3. Anomaly Classification
 Demonstrates the detection curve of out-of-order arrivals and retransmission duplicates during load spikes.
 
-<img width="506" height="290" alt="Disorder Anomalies Breakdown" src="https://github.com/user-attachments/assets/aecf8695-4156-4145-9e16-46df96da7f8e" />
+<img width="479" height="276" alt="Disorder Anomalies Breakdown" src="https://github.com/user-attachments/assets/402d1c8d-f6f4-40d7-9364-f334a0faff40" />
 
 ### 4. Bounded Fleet Cardinality
 Confirms that the device tracking gauge remains constant at 3 devices without label explosion.
