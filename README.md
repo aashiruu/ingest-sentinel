@@ -41,6 +41,13 @@ flowchart LR
     API -.-> Prom
     Prom -.-> Grafana
 ```
+## Verification Proof
+
+During a simultaneous disorder burst (mixed duplicates, out-of-order timestamps, and stale packets), Prometheus counters and Grafana dashboards reflect real-time isolation and correction across active devices:
+
+<img width="1006" height="491" alt="Disorder Test Dashboard" src="https://github.com/user-attachments/assets/5193ead6-451f-4f2d-8a25-7c1a13505e60" />
+
+
 ## Key Correctness Mechanisms
 1. **Idempotent Deduplication (TTL Cache)**: Rejects retransmitted `event_ids` within a sliding retention window to prevent counter inflation.
 
