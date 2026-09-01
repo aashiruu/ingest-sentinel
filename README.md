@@ -88,8 +88,8 @@ python simulate_fleet.py --count 10 --mode disorder
 pytest -v
 ```
 ## Verification & Disorder Proof
-- [out-of-order test scenarios](docs/disorder-testing.md): The core chaos test scenario proving that mixed out-of-order, duplicate, and late events produce mathematically exact ground-truth state.
+- [Disorder & Chaos Testing](docs/disorder-testing.md): The core chaos test scenario proving that mixed out-of-order, duplicate, and late events produce mathematically exact ground-truth state.
 
 -  [Design Decisions & Trade-offs](docs/tradeoffs.md): Detailed architectural trade-offs across storage, deduplication, ordering, watermarks, and cardinality.
 
-- [verification](docs/verification.md): Baseline endpoint curl tests and individual component test runs.
+- [Baseline Verification](docs/verification.md): Baseline endpoint curl tests and individual component test runs.
