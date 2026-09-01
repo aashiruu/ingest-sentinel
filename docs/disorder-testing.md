@@ -1,8 +1,12 @@
 # Disorder & Chaos Testing
 
-This document details the mixed-disorder validation suite simulating realistic sensor network failure modes (simultaneous arrival jitter, out-of-order delivery, network packet duplicates, and stale delayed timestamps).
+This document details both the deterministic unit-level validation and the high-volume fleet chaos simulation under realistic sensor network failure modes (arrival jitter, out-of-order delivery, packet duplicates, and stale delayed timestamps).
 
-## Test Scenario: Mixed Disorder Ingestion
+---
+
+## 1. Deterministic Ground Truth Verification (Unit Level)
+
+This test executes an isolated 6-event sequence against device `sensor-chaos-001` to mathematically prove that duplicate filtering, watermark rejection, and event-time ordering behave correctly.
 
 ### Ground Truth Setup
 Target device: `sensor-chaos-001`
@@ -46,7 +50,7 @@ The ordered historical journal strictly sorted the events as
 `[evt-chaos-a, evt-chaos-b, evt-chaos-c]`
 ### Verification Execution
 ```bash
-pytest tests/test_disorder.py -v.
+pytest tests/test_disorder.py -v
 ```
 ## Observability During Disorder Testing
 
@@ -61,6 +65,12 @@ telemetry_events_disorder_total{type="out_of_order"} 2.0
 telemetry_events_disorder_total{type="late_arrival"} 1.0
 telemetry_events_disorder_total{type="duplicate"} 2.0
 telemetry_active_devices_total 1.0
+```
+## 2. High-Volume Fleet Chaos Simulation (Live Dashboard Burst)
+To observe metric behavior under continuous load, the device fleet simulator was configured to stream **2,500+ randomized events** with aggressive temporal shuffling, duplicate injections, and delayed packets across 3 active sensors.
+### Fleet Simulator Command
+```bash
+python simulate_fleet.py --count 100 --mode disorder
 ```
 ## Dashboard Evidence Under Chaos
 
