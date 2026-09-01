@@ -67,7 +67,15 @@ Emit clean, duplicate, out-of-order, and late-arriving events, then scrape `/met
 ```bash
 pytest tests/test_observability.py -v
 ```
-###Manual Verification Command
+### Manual Verification Command
 ```bash
 curl http://127.0.0.1:8000/metrics | grep telemetry_
+```
+---
+### Verification Run
+
+Run the complete test suite:
+
+```bash
+pytest -v
 ```
