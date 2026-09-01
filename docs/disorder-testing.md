@@ -62,3 +62,25 @@ telemetry_events_disorder_total{type="late_arrival"} 1.0
 telemetry_events_disorder_total{type="duplicate"} 2.0
 telemetry_active_devices_total 1.0
 ```
+## Dashboard Evidence Under Chaos
+
+During high-volume fleet disorder bursts, the Grafana dashboard visualizes real-time metric categorization and disorder tracking across three specific observation areas:
+
+### 1. Full Dashboard Overview
+<img width="1006" height="491" alt="Disorder Test Dashboard Overview" src="https://github.com/user-attachments/assets/c86a1abb-d1cf-4cae-8416-de33d0b07239" />
+
+### 2. Ingestion Status Breakdown
+Tracks throughput of accepted events versus discarded duplicates and late-rejected stale payloads.
+
+<img width="511" height="276" alt="Ingested Events by Status" src="https://github.com/user-attachments/assets/f7ce1da4-d7d1-4bd4-98c3-6447bb91b596" />
+
+
+### 3. Anomaly Classification
+Demonstrates the detection curve of out-of-order arrivals and retransmission duplicates during load spikes.
+
+<img width="506" height="290" alt="Disorder Anomalies Breakdown" src="https://github.com/user-attachments/assets/aecf8695-4156-4145-9e16-46df96da7f8e" />
+
+### 4. Bounded Fleet Cardinality
+Confirms that the device tracking gauge remains constant at 3 devices without label explosion.
+
+<img width="504" height="271" alt="active devices" src="https://github.com/user-attachments/assets/2cda8695-1493-4932-8042-385e9ede8cdf" />
