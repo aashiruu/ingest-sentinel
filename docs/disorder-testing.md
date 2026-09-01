@@ -48,7 +48,6 @@ The ordered historical journal strictly sorted the events as
 ```bash
 pytest tests/test_disorder.py -v.
 ```
-
 ## Observability During Disorder Testing
 
 During chaotic ingestion runs, the `/metrics` endpoint exposes runtime counters reflecting network anomalies:
@@ -63,4 +62,3 @@ telemetry_events_disorder_total{type="late_arrival"} 1.0
 telemetry_events_disorder_total{type="duplicate"} 2.0
 telemetry_active_devices_total 1.0
 ```
-

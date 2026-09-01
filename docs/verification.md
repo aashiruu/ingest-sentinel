@@ -58,7 +58,6 @@ pytest tests/test_late_arrival.py -v
 ```bash
 python simulate_fleet.py --count 3 --mode delayed
 ```
-
 ## Stage 6: Observability Verification
 
 ### Test Strategy
@@ -68,7 +67,7 @@ Emit clean, duplicate, out-of-order, and late-arriving events, then scrape `/met
 ```bash
 pytest tests/test_observability.py -v
 ```
-### Manual Verification Command
+###Manual Verification Command
 ```bash
 curl http://127.0.0.1:8000/metrics | grep telemetry_
 ```
