@@ -58,6 +58,17 @@ pytest tests/test_late_arrival.py -v
 ```bash
 python simulate_fleet.py --count 3 --mode delayed
 ```
+
+## Stage 5: The Disorder Simulation Verification
+
+### Test Strategy
+Execute the mixed-disorder chaos test combining duplicate retransmissions, out-of-order packet arrivals, and late-arriving timestamps in a single stream, asserting exact mathematical state convergence.
+
+### Verification Run
+```bash
+pytest tests/test_disorder.py -v
+```
+
 ## Stage 6: Observability Verification
 
 ### Test Strategy
