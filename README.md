@@ -45,7 +45,7 @@ flowchart LR
 
 During a simultaneous disorder burst (mixed duplicates, out-of-order timestamps, and stale packets), Prometheus counters and Grafana dashboards reflect real-time isolation and correction across active devices:
 
-<img width="1006" height="491" alt="Disorder Test Dashboard" src="https://github.com/user-attachments/assets/5193ead6-451f-4f2d-8a25-7c1a13505e60" />
+<img width="959" height="496" alt="disorder test dashboard overview" src="https://github.com/user-attachments/assets/67947554-fbe0-46ff-9d8c-9625b379ff17" />
 
 
 ## Key Correctness Mechanisms
