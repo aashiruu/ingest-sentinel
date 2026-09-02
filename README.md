@@ -92,4 +92,4 @@ pytest -v
 
 -  [Design Decisions & Trade-offs](docs/tradeoffs.md): Detailed architectural trade-offs across storage, deduplication, ordering, watermarks, and cardinality.
 
-- [Baseline Verification](docs/verification.md): Baseline endpoint curl tests and individual component test runs.
+- [Baseline Verification](docs/verification.md): Baseline endpoint curl tests and individual component tests run.
